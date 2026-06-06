@@ -51,6 +51,10 @@
   ],
   "audio": [
     {
+      "name": "soundtrack.mp3",
+      "src": "/demo/assets/soundtrack.mp3"
+    },
+    {
       "name": "voiceover.mp3",
       "src": "/demo/assets/voiceover.mp3"
     }

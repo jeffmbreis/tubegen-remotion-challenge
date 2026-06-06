@@ -35,7 +35,7 @@ export const MainComposition = ({ items, aspectRatio = '16:9' }) => {
         const primitive = getPrimitive(item.transition.id);
         if (!primitive) return null;
         const props = item.transition.props ?? primitive.defaultProps;
-        const dur = Math.min(props.durationFrames ?? 15, item.durationFrames);
+        const dur = Math.max(1, Math.min(props.durationFrames ?? 15, item.durationFrames));
         const { RemotionComponent } = primitive;
         return (
           <Sequence

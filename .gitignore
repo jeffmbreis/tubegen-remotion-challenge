@@ -6,8 +6,13 @@ dist/
 .env
 .env.local
 
-# Editor/agent local config
+# Editor/agent local config & skill tooling
 .claude/
+.agents/
+.cursor/
+.gemini/
+.kiro/
+skills-lock.json
 
 # Rendered output is large; commit out/final.mp4 deliberately (or link it in your
 # README if it's over 100MB). Ignore everything else under out/.

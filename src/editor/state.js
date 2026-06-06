@@ -21,6 +21,8 @@ const totalDuration = (items) =>
 
 export const initialState = {
   items: [],
+  baseItems: [],
+  script: '',
   selectedItemId: null,
   aspectRatio: '16:9',
   durationFrames: 0,
@@ -31,7 +33,19 @@ export function reducer(state, action) {
     case 'LOAD_SCENES': {
       // action.scenes: Item[] — typically from scenes.json
       const items = action.scenes.map((s) => ({ ...s, id: s.id ?? makeItemId() }));
-      return { ...state, items, durationFrames: totalDuration(items) };
+      return { ...state, items, baseItems: items, durationFrames: totalDuration(items) };
+    }
+
+    case 'LOAD_SCRIPT':
+      return { ...state, script: action.script ?? '' };
+
+    case 'SET_ITEMS': {
+      // action.items: Item[] — replace the whole timeline (used by the Auto-Director)
+      const items = action.items.map((i) => ({ ...i, id: i.id ?? makeItemId() }));
+      const selectedItemId = items.some((i) => i.id === state.selectedItemId)
+        ? state.selectedItemId
+        : null;
+      return { ...state, items, selectedItemId, durationFrames: totalDuration(items) };
     }
 
     case 'SELECT_ITEM':

@@ -48,6 +48,8 @@ export default {
   defaultProps: { durationFrames: 15 },
   RemotionComponent: CrossfadeRender,
   PropertiesEditor: CrossfadeProps,
-  // Only valid at the end of an image scene whose next scene is also an image.
-  canApply: (scene, nextScene) => scene?.type === 'image' && nextScene?.type === 'image',
+  canApply: (scene, nextScene) => {
+    const still = new Set(['image', 'animation']);
+    return still.has(scene?.type) && still.has(nextScene?.type);
+  },
 };

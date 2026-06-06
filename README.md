@@ -6,6 +6,23 @@ You're given a working React + Vite + Remotion video editor and a demo project. 
 produce the most compelling final cut you can — by adding **reusable editor primitives**, not
 one-off hacks — and render it to MP4.
 
+## This submission
+
+See **[`WRITEUP.md`](./WRITEUP.md)** for the full rationale. In short:
+
+- **19 reusable primitives** on a shared design system (`src/editor/extension/lib/` — tokens, motion,
+  fields). New this fork: Ken Burns, Camera Shake, Color Grade (effects); Dip-to-Color, Slide, Glitch
+  Dissolve (transitions); Kinetic Text, Callout, Stat Meter, Cinematic Frame (overlays); Title Card,
+  Bar Chart, End Card (scene types). None reference the demo's assets, durations, or scene indices.
+- **Extended editor surface:** an Overlays tab to place overlay/scene-type items on a new **O1** track
+  (drag/resize), a **Music (A2)** track, and item editing/deletion — all driven by the registry, with no
+  primitive-specific code in `MainComposition.jsx` / `VideoItem.jsx`.
+- **Bonus — AI Auto-Director** (`src/editor/director.js`, "✦ AI Director" tab): content-aware auto-edit from
+  scene type/length/position + the transcript, idempotent with a Reset.
+- **Starter bug fixed:** `npm run render` failed to bundle (`"type": "module"` + extensionless ESM
+  imports). Fixed with `remotion.config.js`. The final cut is in `public/demo/scenes.json`; render output
+  is `out/final.mp4`.
+
 ## Quick start
 
 ```bash

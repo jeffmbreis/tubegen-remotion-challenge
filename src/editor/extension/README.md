@@ -81,7 +81,27 @@ Several primitives ship with the starter. Read them in order, fastest first:
 3. **[`overlays/lowerThird.jsx`](./overlays/lowerThird.jsx)** — overlay category. Standalone item with text props.
 4. **[`transitions/crossfade.jsx`](./transitions/crossfade.jsx)** — transition category. Reads `nextItem` from `ctx`, dissolves into the next scene, and uses `canApply` to restrict itself to image→image boundaries.
 
-No `sceneType` example ships — implementing one (a chart, a map, animated text) is a great way to show the seam works.
+`sceneType` examples now ship too: **`sceneTypes/titleCard.jsx`**, **`sceneTypes/barChart.jsx`** (data-driven), and **`sceneTypes/endCard.jsx`**.
+
+## The shared design lib (`lib/`)
+
+New primitives build on a small design system so the whole editor stays consistent and resolution-independent. Import from `../lib/*`:
+
+- **`lib/tokens.js`** — `COLORS`, `GRADIENTS`, `FONTS`, `TYPE` (size scale), `WEIGHT`, `TRACKING`, `LEADING`, `SPACE`, `RADIUS`, `SHADOW`, and `scaleForHeight(height)`.
+- **`lib/motion.jsx`** — `EASE`, `SPRING` presets, `useCanvasScale()` (= `height/1080`, multiply every px by it), `useSpringValue(delay, config)`, `ramp(frame, inRange, outRange, easing)` (clamped interpolate), `exitFade(frame, dur, exitFrames)` (0-safe), `staggerDelay`, `toWords`, and the `AnimatedEntry` / `AnimatedWords` components.
+- **`lib/fields.jsx`** — controlled PropertiesEditor inputs: `Fields`, `NumberField`, `RangeField`, `TextField`, `ColorField`, `SelectField`. Each `onChange` hands back the already-parsed value, so a whole editor is one declarative block.
+
+Resolution independence is part of the contract: size everything off `useCanvasScale()` rather than raw pixels, and a primitive will look right at 16:9 or 9:16.
+
+## Placing overlays & scene types (editor seam)
+
+Effects and transitions are *applied to existing scenes* (the **Effects** tab → scene-picker modal). Overlays and scene types are *their own timeline items*, so they need to be placed:
+
+- The **Overlays** tab lists every `overlay` / `sceneType` primitive. Clicking one drops an instance on the **O1** overlay track at the playhead.
+- O1 items are authorable: drag the body to move, drag an edge to resize, edit start/duration or delete in the PropertiesPanel. (Scene clips on V1 stay locked.)
+- Audio lives on **A1** (voiceover) and **A2** (music).
+
+All of this reads the registry generically — adding a primitive still means *one file + one registry line*, with no edits to `Timeline.jsx`, `AssetsSidebar.jsx`, `MainComposition.jsx`, or `VideoItem.jsx`.
 
 ## Anti-patterns we flag
 

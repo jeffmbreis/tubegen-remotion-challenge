@@ -29,6 +29,10 @@ export default function App() {
       .then((r) => r.json())
       .then((scenes) => dispatch({ type: 'LOAD_SCENES', scenes }))
       .catch((err) => console.error('Failed to load scenes.json', err));
+    fetch('/demo/assets/script.txt')
+      .then((r) => (r.ok ? r.text() : ''))
+      .then((script) => dispatch({ type: 'LOAD_SCRIPT', script }))
+      .catch(() => {});
   }, []);
 
   // Keep the timeline playhead in sync with the Player's current frame.
@@ -69,7 +73,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <AssetsSidebar state={state} dispatch={dispatch} />
+      <AssetsSidebar state={state} dispatch={dispatch} currentFrame={currentFrame} />
 
       <main className="stage">
         <div className="preview">

@@ -30,7 +30,14 @@ export default function PropertiesPanel({ state, dispatch }) {
 
   const patch = (p) => dispatch({ type: 'UPDATE_ITEM', id: item.id, patch: p });
   const isAudio = AUDIO_TYPES.has(item.type);
+  const isPrimitive = PRIMITIVE_ITEM_TYPES.has(item.type);
+  const primitive = isPrimitive ? getPrimitive(item.primitiveId) : null;
   const seconds = (frames) => (frames / FPS).toFixed(2);
+  const title = primitive?.label ?? basename(item.src) ?? item.type;
+  const intOr = (raw, fallback) => {
+    const n = parseInt(raw, 10);
+    return Number.isFinite(n) ? n : fallback;
+  };
 
   // Effect editor → patch the matching effects[] entry.
   const onEffectChange = (idx) => (nextProps) => {
@@ -47,19 +54,46 @@ export default function PropertiesPanel({ state, dispatch }) {
   return (
     <aside className="properties-panel">
       <header className="pp-header">
-        <span className="pp-title">{basename(item.src) || item.type}</span>
+        <span className="pp-title">{title}</span>
         <span className="pp-type">{item.type}</span>
       </header>
 
       <section className="props-form">
-        <div className="pp-row">
-          <span>Start</span>
-          <span>{item.startFrame} f · {seconds(item.startFrame)}s</span>
-        </div>
-        <div className="pp-row">
-          <span>Duration</span>
-          <span>{item.durationFrames} f · {seconds(item.durationFrames)}s</span>
-        </div>
+        {isPrimitive ? (
+          <>
+            <label>
+              Start (f)
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={item.startFrame}
+                onChange={(e) => patch({ startFrame: Math.max(0, intOr(e.target.value, item.startFrame)) })}
+              />
+            </label>
+            <label>
+              Duration (f)
+              <input
+                type="number"
+                min="1"
+                step="1"
+                value={item.durationFrames}
+                onChange={(e) => patch({ durationFrames: Math.max(1, intOr(e.target.value, item.durationFrames)) })}
+              />
+            </label>
+          </>
+        ) : (
+          <>
+            <div className="pp-row">
+              <span>Start</span>
+              <span>{item.startFrame} f · {seconds(item.startFrame)}s</span>
+            </div>
+            <div className="pp-row">
+              <span>Duration</span>
+              <span>{item.durationFrames} f · {seconds(item.durationFrames)}s</span>
+            </div>
+          </>
+        )}
         <p className="pp-hint">
           {seconds(item.startFrame)}s → {seconds(item.startFrame + item.durationFrames)}s
         </p>
@@ -80,21 +114,20 @@ export default function PropertiesPanel({ state, dispatch }) {
       </section>
 
       {/* Overlay / scene-type primitive props */}
-      {PRIMITIVE_ITEM_TYPES.has(item.type) &&
-        (() => {
-          const primitive = getPrimitive(item.primitiveId);
-          if (!primitive?.PropertiesEditor) return null;
-          const { PropertiesEditor } = primitive;
-          return (
-            <section className="pp-section">
-              <h4 className="pp-section-title">{primitive.label}</h4>
-              <PropertiesEditor
-                props={item.primitiveProps ?? primitive.defaultProps}
-                onChange={(p) => patch({ primitiveProps: p })}
-              />
-            </section>
-          );
-        })()}
+      {isPrimitive && primitive?.PropertiesEditor && (
+        <section className="pp-section">
+          <div className="pp-section-head">
+            <h4 className="pp-section-title">{primitive.label}</h4>
+            <button className="pp-remove" onClick={() => dispatch({ type: 'REMOVE_ITEM', id: item.id })}>
+              Delete
+            </button>
+          </div>
+          <primitive.PropertiesEditor
+            props={item.primitiveProps ?? primitive.defaultProps}
+            onChange={(p) => patch({ primitiveProps: p })}
+          />
+        </section>
+      )}
 
       {/* Applied effects */}
       {(item.effects ?? []).map((effect, idx) => {

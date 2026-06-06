@@ -9,7 +9,7 @@ const ZoomOutRender = ({ props, ctx, children }) => {
 
   const scale = interpolate(
     frame,
-    [0, durationFrames],
+    [0, Math.max(1, durationFrames)],
     [startScale, endScale],
     { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
   );

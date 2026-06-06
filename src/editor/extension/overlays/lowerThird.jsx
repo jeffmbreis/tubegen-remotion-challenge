@@ -1,56 +1,51 @@
-// Overlay: lower-third title card.
-// Worked example — fork this when adding new overlay primitives (callouts, title cards,
-// pull-quotes, stat boxes, etc.).
-//
-// Overlays are first-class timeline items: they appear on their own row, have their own
-// start/end time, and render on top of whatever video/image is underneath at the same
-// frame range. They do NOT wrap an underlying media item — for that, use the 'effect'
-// category.
-
 import { AbsoluteFill, useCurrentFrame, interpolate } from 'remotion';
+import { COLORS, FONTS, TYPE, WEIGHT, LEADING, SPACE, RADIUS } from '../lib/tokens';
+import { useCanvasScale, exitFade } from '../lib/motion';
+import { Fields, TextField, ColorField, NumberField } from '../lib/fields';
 
 const LowerThirdRender = ({ props, ctx }) => {
   const frame = useCurrentFrame();
   const { durationFrames } = ctx;
+  const s = useCanvasScale();
   const {
     title = 'Title',
     subtitle = '',
-    backgroundColor = 'rgba(0,0,0,0.7)',
-    textColor = '#FFFFFF',
-    fontFamily = 'Inter, system-ui, sans-serif',
+    backgroundColor = COLORS.inkPanel,
+    textColor = COLORS.paper,
+    accent = COLORS.accent,
     enterFrames = 12,
     exitFrames = 12,
   } = props;
 
-  const enter = interpolate(frame, [0, enterFrames], [0, 1], { extrapolateRight: 'clamp' });
-  const exit = interpolate(
-    frame,
-    [durationFrames - exitFrames, durationFrames],
-    [1, 0],
-    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
-  );
-  const opacity = Math.min(enter, exit);
-  const translateX = interpolate(enter, [0, 1], [-30, 0]);
+  const enter = interpolate(frame, [0, Math.max(1, enterFrames)], [0, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const opacity = Math.min(enter, exitFade(frame, durationFrames, exitFrames));
+  const translateX = interpolate(enter, [0, 1], [-30 * s, 0]);
 
   return (
     <AbsoluteFill style={{ pointerEvents: 'none' }}>
       <div
         style={{
           position: 'absolute',
-          left: 60, bottom: 80,
-          padding: '18px 28px',
+          left: SPACE.safe * s,
+          bottom: SPACE.xl * s,
+          padding: `${SPACE.sm * s}px ${SPACE.lg * s}px`,
           background: backgroundColor,
           color: textColor,
-          fontFamily,
-          borderLeft: `4px solid ${textColor}`,
+          fontFamily: FONTS.body,
+          borderLeft: `${4 * s}px solid ${accent}`,
+          borderRadius: RADIUS.sm * s,
           opacity,
           transform: `translateX(${translateX}px)`,
           maxWidth: '60%',
+          backdropFilter: 'blur(8px)',
         }}
       >
-        <div style={{ fontSize: 38, fontWeight: 700, lineHeight: 1.15 }}>{title}</div>
+        <div style={{ fontSize: TYPE.title * s, fontWeight: WEIGHT.bold, lineHeight: LEADING.snug }}>{title}</div>
         {subtitle ? (
-          <div style={{ fontSize: 22, opacity: 0.85, marginTop: 4 }}>{subtitle}</div>
+          <div style={{ fontSize: TYPE.label * s, opacity: 0.85, marginTop: SPACE.xs * s }}>{subtitle}</div>
         ) : null}
       </div>
     </AbsoluteFill>
@@ -58,17 +53,17 @@ const LowerThirdRender = ({ props, ctx }) => {
 };
 
 const LowerThirdProps = ({ props, onChange }) => {
-  const set = (k) => (e) => onChange({ ...props, [k]: e.target.value });
-  const setN = (k) => (e) => onChange({ ...props, [k]: parseInt(e.target.value, 10) || 0 });
+  const set = (k) => (v) => onChange({ ...props, [k]: v });
   return (
-    <div className="props-form">
-      <label>Title<input type="text" value={props.title} onChange={set('title')} /></label>
-      <label>Subtitle<input type="text" value={props.subtitle} onChange={set('subtitle')} /></label>
-      <label>Background<input type="text" value={props.backgroundColor} onChange={set('backgroundColor')} /></label>
-      <label>Text color<input type="color" value={props.textColor} onChange={set('textColor')} /></label>
-      <label>Enter frames<input type="number" min="1" max="60" value={props.enterFrames} onChange={setN('enterFrames')} /></label>
-      <label>Exit frames<input type="number" min="1" max="60" value={props.exitFrames} onChange={setN('exitFrames')} /></label>
-    </div>
+    <Fields>
+      <TextField label="Title" value={props.title} onChange={set('title')} />
+      <TextField label="Subtitle" value={props.subtitle} onChange={set('subtitle')} />
+      <TextField label="Background" value={props.backgroundColor} onChange={set('backgroundColor')} />
+      <ColorField label="Accent" value={props.accent} onChange={set('accent')} />
+      <ColorField label="Text color" value={props.textColor} onChange={set('textColor')} />
+      <NumberField label="Enter frames" value={props.enterFrames} onChange={set('enterFrames')} step={1} min={1} max={60} />
+      <NumberField label="Exit frames" value={props.exitFrames} onChange={set('exitFrames')} step={1} min={0} max={60} />
+    </Fields>
   );
 };
 
@@ -79,9 +74,9 @@ export default {
   defaultProps: {
     title: 'Title',
     subtitle: '',
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    textColor: '#FFFFFF',
-    fontFamily: 'Inter, system-ui, sans-serif',
+    backgroundColor: COLORS.inkPanel,
+    textColor: COLORS.paper,
+    accent: COLORS.accent,
     enterFrames: 12,
     exitFrames: 12,
   },

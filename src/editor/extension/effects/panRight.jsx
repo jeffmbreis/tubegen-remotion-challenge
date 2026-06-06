@@ -11,7 +11,7 @@ const PanRightRender = ({ props, ctx, children }) => {
 
   const x = interpolate(
     frame,
-    [0, durationFrames],
+    [0, Math.max(1, durationFrames)],
     [-pan, pan],
     { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
   );
